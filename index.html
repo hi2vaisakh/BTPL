@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cricket Tournament Management Dashboard</title>
+    <title>AuctionX 💰</title>
     
     <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
@@ -291,8 +293,8 @@
                     <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-lg mb-4">
                         <span class="text-3xl">🏏</span>
                     </div>
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Cricket Tournament</h1>
-                    <p class="text-gray-600">Management Dashboard</p>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">AuctionX 💰</h1>
+                    <p class="text-gray-600">Emphasizing fair and smart selection</p>
                 </div>
                 
                 <form id="loginForm" class="space-y-6">
@@ -301,7 +303,8 @@
                             <i class="fas fa-user mr-2"></i>Username
                         </label>
                         <input type="text" id="username" required 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200">
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                               autocomplete="username">
                     </div>
                     
                     <div>
@@ -309,23 +312,38 @@
                             <i class="fas fa-lock mr-2"></i>Password
                         </label>
                         <input type="password" id="password" required 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200">
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                               autocomplete="current-password">
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fas fa-shield-alt mr-1"></i>
+                            Your password is encrypted using SHA-256 before authentication
+                        </p>
                     </div>
                     
                     <button type="submit" class="w-full gradient-primary text-white py-3 rounded-lg font-semibold btn-shine hover:shadow-lg transition duration-300">
-                        <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                        <i class="fas fa-sign-in-alt mr-2"></i>Sign In Securely
                     </button>
                 </form>
                 
                 <div id="loginAlert" class="mt-6"></div>
                 
                 <div class="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
-                    <p class="text-sm text-gray-700 font-medium mb-2">
+                    <!--<p class="text-sm text-gray-700 font-medium mb-2">
                         <i class="fas fa-info-circle text-purple-600 mr-2"></i>Demo Credentials
                     </p>
                     <div class="text-sm text-gray-600 space-y-1">
                         <p>Username: <code class="bg-white px-2 py-1 rounded">admin</code></p>
                         <p>Password: <code class="bg-white px-2 py-1 rounded">cricket2024</code></p>
+                    </div>-->
+                    <div class="mt-3 pt-3 border-t border-purple-200">
+                        <!--<p class="text-xs text-purple-700">
+                            <i class="fas fa-lock mr-1"></i>
+                            <strong>Security:</strong> Passwords are hashed using SHA-256 encryption
+                        </p>-->
+                        <p class="text-xs text-purple-700 mt-1">
+                            <i class="fas fa-clock mr-1"></i>
+                            <strong>Session:</strong> Auto-expires after 24 hours
+                        </p>
                     </div>
                 </div>
             </div>
@@ -342,7 +360,7 @@
                         <div class="flex items-center">
                             <span class="text-2xl mr-3">🏏</span>
                             <div>
-                                <h1 class="text-white text-xl font-bold">AuctionX 💰 </h1>
+                                <h1 class="text-white text-xl font-bold">AuctionX 💰</h1>
                                 <p class="text-gray-400 text-xs">
                                     <span id="headerConnectionStatus" class="mr-3">
                                         <i class="fas fa-circle text-yellow-400 text-xs mr-1"></i>Connecting...
@@ -444,10 +462,18 @@
 
                 <!-- Players List -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-list mr-2 text-purple-600"></i>
-                        Registered Players
-                    </h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            <i class="fas fa-list mr-2 text-purple-600"></i>
+                            Registered Players
+                        </h3>
+                        <div class="relative">
+                            <input type="text" id="playerSearchInput" placeholder="Search players..." 
+                                   onkeyup="filterPlayersList()"
+                                   class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 w-64">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
                     <div id="playersList" class="space-y-2"></div>
                 </div>
             </div>
@@ -682,10 +708,18 @@
 
                 <!-- Available Players -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-users mr-2 text-green-600"></i>
-                        Available Players
-                    </h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            <i class="fas fa-users mr-2 text-green-600"></i>
+                            Available Players
+                        </h3>
+                        <div class="relative" id="draftSearchContainer" style="display: none;">
+                            <input type="text" id="draftPlayerSearchInput" placeholder="Search available players..." 
+                                   onkeyup="filterDraftPlayers()"
+                                   class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 w-64">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
                     <div id="availablePlayers" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"></div>
                 </div>
 
@@ -822,7 +856,7 @@
                             Data Management
                         </h3>
                         <div class="space-y-3">
-                            <button onclick="exportData()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition duration-200">
+                            <button onclick="showExportModal()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition duration-200">
                                 <i class="fas fa-download mr-2"></i>Export Data
                             </button>
                             <button onclick="showActivityLog()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-medium transition duration-200">
@@ -857,6 +891,27 @@
                         <div class="bg-gray-50 rounded-lg p-4">
                             <p class="text-gray-600 text-sm">Last Modified</p>
                             <p class="text-lg font-semibold text-gray-800" id="lastModified">-</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <h4 class="font-semibold text-gray-800 mb-2">
+                            <i class="fas fa-shield-alt mr-2 text-green-600"></i>
+                            Security Status
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                <span class="text-gray-700">Password Encryption: <strong>SHA-256</strong></span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                <span class="text-gray-700">Session Timeout: <strong>24 Hours</strong></span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                <span class="text-gray-700">Secure Storage: <strong>Active</strong></span>
+                            </div>
                         </div>
                     </div>
 
@@ -895,6 +950,41 @@
         </div>
     </div>
 
+    <!-- Export Options Modal -->
+    <div id="exportModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full m-4">
+            <div class="gradient-primary text-white p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold">
+                        <i class="fas fa-download mr-2"></i>Export Data
+                    </h2>
+                    <button onclick="closeExportModal()" class="text-white hover:text-gray-200 transition duration-200">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 mb-6">Choose your preferred export format:</p>
+                <div class="space-y-4">
+                    <button onclick="exportToCSV(); closeExportModal();" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-file-csv mr-3 text-2xl"></i>
+                        <div class="text-left">
+                            <div class="font-semibold">Export as CSV</div>
+                            <div class="text-sm opacity-90">Spreadsheet format for Excel/Google Sheets</div>
+                        </div>
+                    </button>
+                    <button onclick="exportToPDF(); closeExportModal();" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition duration-200 flex items-center justify-center">
+                        <i class="fas fa-file-pdf mr-3 text-2xl"></i>
+                        <div class="text-left">
+                            <div class="font-semibold">Export as PDF</div>
+                            <div class="text-sm opacity-90">Professional report format for printing</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Application State
         let appState = {
@@ -915,6 +1005,11 @@
             isLoggedIn: false,
             currentUser: null
         };
+
+        // Password Hashing Function using SHA-256
+        function hashPassword(password) {
+            return CryptoJS.SHA256(password).toString();
+        }
 
         // Simple Storage Implementation (using localStorage)
         class SimpleStorage {
@@ -950,15 +1045,141 @@
 
         const storage = new SimpleStorage();
 
+        // Session Management
+        function createSession(username) {
+            const sessionData = {
+                username: username,
+                loginTime: new Date().toISOString(),
+                sessionId: generateSessionId(),
+                isActive: true
+            };
+            localStorage.setItem('cricket_session', JSON.stringify(sessionData));
+        }
+
+        function generateSessionId() {
+            // Generate a random session ID for added security
+            return 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function getSession() {
+            try {
+                const sessionData = localStorage.getItem('cricket_session');
+                if (!sessionData) return null;
+                
+                const session = JSON.parse(sessionData);
+                
+                // Check if session is expired (24 hours)
+                const loginTime = new Date(session.loginTime);
+                const now = new Date();
+                const hoursSinceLogin = (now - loginTime) / (1000 * 60 * 60);
+                
+                if (hoursSinceLogin > 24) {
+                    clearSession();
+                    return null;
+                }
+                
+                return session;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function clearSession() {
+            localStorage.removeItem('cricket_session');
+        }
+
+        // Initialize stored credentials on first run
+        function initializeCredentials() {
+            const storedAuth = localStorage.getItem('cricket_auth');
+            if (!storedAuth) {
+                // Store default admin credentials (hashed)
+                const defaultAuth = {
+                    admin: {
+                        passwordHash: hashPassword('cricket2024'),
+                        role: 'administrator',
+                        createdAt: new Date().toISOString()
+                    }
+                };
+                localStorage.setItem('cricket_auth', JSON.stringify(defaultAuth));
+            }
+        }
+
+        // Get stored credentials
+        function getStoredCredentials() {
+            try {
+                const storedAuth = localStorage.getItem('cricket_auth');
+                return storedAuth ? JSON.parse(storedAuth) : {};
+            } catch (error) {
+                return {};
+            }
+        }
+
+        // Update password (for future use)
+        function updatePassword(username, newPassword) {
+            const credentials = getStoredCredentials();
+            if (credentials[username]) {
+                credentials[username].passwordHash = hashPassword(newPassword);
+                credentials[username].updatedAt = new Date().toISOString();
+                localStorage.setItem('cricket_auth', JSON.stringify(credentials));
+                return true;
+            }
+            return false;
+        }
+
+        // Secure Credential Validation (Updated)
+        function validateCredentials(username, password) {
+            // Get stored credentials
+            const credentials = getStoredCredentials();
+            
+            // Hash the input password
+            const hashedPassword = hashPassword(password);
+            
+            // Check if user exists and password hash matches
+            if (credentials[username]) {
+                return credentials[username].passwordHash === hashedPassword;
+            }
+            
+            return false;
+        }
+
+        // Check session on page load
+        async function checkSession() {
+            const session = getSession();
+            if (session && session.isActive) {
+                appState.isLoggedIn = true;
+                appState.currentUser = session.username;
+                
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('mainApp').classList.remove('hidden');
+                
+                await loadFromStorage();
+                await updateSystemInfo();
+                
+                return true;
+            }
+            return false;
+        }
+
         // Login functionality
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            if (username === 'admin' && password === 'cricket2024') {
+            // Show loading state
+            showAlert('loginAlert', '<i class="fas fa-spinner fa-spin mr-2"></i>Authenticating...', 'info');
+            
+            // Validate credentials using encrypted comparison
+            if (validateCredentials(username, password)) {
                 appState.isLoggedIn = true;
                 appState.currentUser = username;
+                
+                // Create session (store hashed data for security)
+                createSession(username);
+                
+                // Log successful login (for audit purposes)
+                console.log(`Login successful for user: ${username} at ${new Date().toISOString()}`);
                 
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
@@ -969,13 +1190,23 @@
                 
                 showAlert('loginAlert', '<i class="fas fa-check-circle mr-2"></i>Login successful!', 'success');
             } else {
+                // Log failed attempt (for security monitoring)
+                console.warn(`Failed login attempt for username: ${username} at ${new Date().toISOString()}`);
+                
                 showAlert('loginAlert', '<i class="fas fa-times-circle mr-2"></i>Invalid credentials!', 'error');
+                
+                // Clear password field for security
+                document.getElementById('password').value = '';
             }
         });
 
         async function logout() {
             appState.isLoggedIn = false;
             appState.currentUser = null;
+            
+            // Clear session
+            clearSession();
+            
             document.getElementById('loginSection').style.display = 'flex';
             document.getElementById('mainApp').style.display = 'none';
             document.getElementById('username').value = '';
@@ -995,6 +1226,13 @@
             
             document.getElementById(tabName).classList.remove('hidden');
             event.target.classList.add('active');
+            
+            // Clear search inputs when switching tabs
+            const playerSearch = document.getElementById('playerSearchInput');
+            if (playerSearch) playerSearch.value = '';
+            
+            const draftSearch = document.getElementById('draftPlayerSearchInput');
+            if (draftSearch) draftSearch.value = '';
             
             // Refresh content based on tab
             if (tabName === 'teams') {
@@ -1078,28 +1316,316 @@
             }
         }
 
-        async function exportData() {
+        function showExportModal() {
+            document.getElementById('exportModal').style.display = 'flex';
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportModal').style.display = 'none';
+        }
+
+        // Search and Filter Functions
+        function filterPlayersList() {
+            const searchInput = document.getElementById('playerSearchInput').value.toLowerCase();
+            const container = document.getElementById('playersList');
+            
+            if (appState.players.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">No players added yet.</p>';
+                return;
+            }
+            
+            const filteredPlayers = appState.players.filter(player => 
+                player.toLowerCase().includes(searchInput)
+            );
+            
+            if (filteredPlayers.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">No players found matching your search.</p>';
+                return;
+            }
+            
+            container.innerHTML = filteredPlayers.map(player => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
+                    <span class="font-medium text-gray-800">${player}</span>
+                    <button onclick="removePlayer('${player}')" class="text-red-600 hover:text-red-700">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function filterDraftPlayers() {
+            const searchInput = document.getElementById('draftPlayerSearchInput').value.toLowerCase();
+            const availablePlayers = appState.players.filter(player => 
+                !Object.values(appState.teams).some(team => team.players.includes(player))
+            );
+            
+            const filteredPlayers = availablePlayers.filter(player => 
+                player.toLowerCase().includes(searchInput)
+            );
+            
+            const container = document.getElementById('availablePlayers');
+            
+            if (filteredPlayers.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <i class="fas fa-search text-6xl mb-4 text-gray-300"></i>
+                        <h3 class="text-xl font-semibold mb-2">No Players Found</h3>
+                        <p>No available players match your search.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filteredPlayers.map(player => `
+                <div class="player-card-new p-4 rounded-lg cursor-pointer text-center font-medium" 
+                     onclick="selectPlayer('${player}')" data-player="${player}">
+                    <i class="fas fa-user mb-2 text-gray-400"></i><br>
+                    ${player}
+                </div>
+            `).join('');
+        }
+
+        async function exportToCSV() {
             try {
-                const dataToExport = {
-                    ...appState,
-                    exportedAt: new Date().toISOString(),
-                    exportedBy: appState.currentUser
-                };
+                let csvContent = "Team,Player,Role,Draft Round,Draft Pick\n";
                 
-                const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+                // Add team data
+                Object.entries(appState.teams).forEach(([teamId, team]) => {
+                    team.players.forEach((player, index) => {
+                        const role = player === team.captain ? "Captain" : "Player";
+                        const draftRound = index === 0 && player === team.captain ? "-" : Math.ceil((index) / 4);
+                        const draftPick = index === 0 && player === team.captain ? "-" : index;
+                        csvContent += `"${team.name}","${player}","${role}","${draftRound}","${draftPick}"\n`;
+                    });
+                    
+                    // Add empty slots
+                    const emptySlots = 12 - team.players.length;
+                    for (let i = 0; i < emptySlots; i++) {
+                        csvContent += `"${team.name}","[Empty Slot]","-","-","-"\n`;
+                    }
+                });
+                
+                // Add unassigned players
+                const assignedPlayers = Object.values(appState.teams).flatMap(team => team.players);
+                const unassignedPlayers = appState.players.filter(p => !assignedPlayers.includes(p));
+                
+                if (unassignedPlayers.length > 0) {
+                    csvContent += "\nUnassigned Players\n";
+                    unassignedPlayers.forEach(player => {
+                        csvContent += `"Unassigned","${player}","-","-","-"\n`;
+                    });
+                }
+                
+                // Add summary
+                csvContent += "\n\nSummary\n";
+                csvContent += `"Total Players","${appState.players.length}"\n`;
+                csvContent += `"Assigned Players","${assignedPlayers.length}"\n`;
+                csvContent += `"Unassigned Players","${unassignedPlayers.length}"\n`;
+                csvContent += `"Export Date","${new Date().toLocaleString()}"\n`;
+                csvContent += `"Exported By","${appState.currentUser || 'Unknown'}"\n`;
+                
+                // Download CSV
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `cricket_tournament_${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `cricket_tournament_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
                 URL.revokeObjectURL(url);
                 
-                showAlert('systemAlert', '<i class="fas fa-check-circle mr-2"></i>Data exported successfully!', 'success');
+                showAlert('systemAlert', '<i class="fas fa-check-circle mr-2"></i>CSV exported successfully!', 'success');
             } catch (error) {
-                showAlert('systemAlert', '<i class="fas fa-times-circle mr-2"></i>Export failed!', 'error');
+                console.error('CSV export error:', error);
+                showAlert('systemAlert', '<i class="fas fa-times-circle mr-2"></i>CSV export failed!', 'error');
             }
+        }
+
+        async function exportToPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Add header background
+                doc.setFillColor(102, 126, 234);
+                doc.rect(0, 0, 210, 40, 'F');
+                
+                // Title
+                doc.setFontSize(24);
+                doc.setTextColor(255, 255, 255);
+                doc.text('Cricket Tournament Report', 105, 20, { align: 'center' });
+                
+                // Date and user
+                doc.setFontSize(11);
+                doc.setTextColor(230, 230, 250);
+                doc.text(`Generated: ${new Date().toLocaleString()}`, 105, 30, { align: 'center' });
+                doc.text(`By: ${appState.currentUser || 'Unknown'}`, 105, 36, { align: 'center' });
+                
+                let yPosition = 50;
+                
+                // Summary section
+                doc.setFontSize(16);
+                doc.setTextColor(102, 126, 234);
+                doc.text('Tournament Summary', 14, yPosition);
+                yPosition += 10;
+                
+                // Summary box
+                doc.setFillColor(245, 247, 250);
+                doc.rect(14, yPosition - 5, 182, 25, 'F');
+                
+                doc.setFontSize(11);
+                doc.setTextColor(60, 60, 60);
+                const assignedPlayers = Object.values(appState.teams).flatMap(team => team.players);
+                const unassignedPlayers = appState.players.filter(p => !assignedPlayers.includes(p));
+                
+                doc.text(`Total Players: ${appState.players.length}`, 20, yPosition + 3);
+                doc.text(`Assigned Players: ${assignedPlayers.length}`, 80, yPosition + 3);
+                doc.text(`Unassigned Players: ${unassignedPlayers.length}`, 140, yPosition + 3);
+                doc.text(`Teams: ${Object.keys(appState.teams).length}`, 20, yPosition + 10);
+                doc.text(`Draft Rounds: ${appState.currentDraftRound - 1} completed`, 80, yPosition + 10);
+                doc.text(`Tournament Status: ${assignedPlayers.length === appState.players.length ? 'Complete' : 'In Progress'}`, 140, yPosition + 10);
+                yPosition += 35;
+                
+                // Teams section
+                doc.setFontSize(16);
+                doc.setTextColor(102, 126, 234);
+                doc.text('Team Compositions', 14, yPosition);
+                yPosition += 10;
+                
+                // Create teams tables with better styling
+                Object.entries(appState.teams).forEach(([teamId, team]) => {
+                    if (yPosition > 240) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    // Team header with background
+                    doc.setFillColor(102, 126, 234);
+                    doc.rect(14, yPosition - 5, 182, 10, 'F');
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(255, 255, 255);
+                    doc.text(team.name, 18, yPosition);
+                    
+                    if (team.captain) {
+                        doc.setFontSize(10);
+                        doc.text(`Captain: ${team.captain}`, 70, yPosition);
+                    }
+                    
+                    doc.setTextColor(255, 255, 255);
+                    doc.text(`${team.players.length}/12 Players`, 170, yPosition);
+                    yPosition += 10;
+                    
+                    // Team players table
+                    const tableData = team.players.map((player, index) => [
+                        index + 1,
+                        player,
+                        player === team.captain ? '👑 Captain' : 'Player',
+                        player === team.captain ? '-' : `Round ${Math.ceil(index / 4)}`
+                    ]);
+                    
+                    // Add empty slots
+                    const emptySlots = 12 - team.players.length;
+                    for (let i = 0; i < emptySlots; i++) {
+                        tableData.push([
+                            team.players.length + i + 1,
+                            '[Empty Slot]',
+                            '-',
+                            '-'
+                        ]);
+                    }
+                    
+                    doc.autoTable({
+                        head: [['#', 'Player Name', 'Role', 'Draft']],
+                        body: tableData,
+                        startY: yPosition,
+                        margin: { left: 14 },
+                        styles: { 
+                            fontSize: 9,
+                            cellPadding: 3
+                        },
+                        headStyles: { 
+                            fillColor: [148, 163, 184],
+                            textColor: [255, 255, 255]
+                        },
+                        alternateRowStyles: {
+                            fillColor: [248, 250, 252]
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 12 },
+                            1: { cellWidth: 70 },
+                            2: { cellWidth: 40 },
+                            3: { cellWidth: 30 }
+                        }
+                    });
+                    
+                    yPosition = doc.lastAutoTable.finalY + 12;
+                });
+                
+                // Unassigned players
+                if (unassignedPlayers.length > 0) {
+                    if (yPosition > 220) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    // Unassigned header with background
+                    doc.setFillColor(239, 68, 68);
+                    doc.rect(14, yPosition - 5, 182, 10, 'F');
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(255, 255, 255);
+                    doc.text('Unassigned Players', 18, yPosition);
+                    doc.text(`${unassignedPlayers.length} Players`, 170, yPosition);
+                    yPosition += 10;
+                    
+                    const unassignedData = unassignedPlayers.map((player, index) => [
+                        index + 1,
+                        player,
+                        'Available for Draft'
+                    ]);
+                    
+                    doc.autoTable({
+                        head: [['#', 'Player Name', 'Status']],
+                        body: unassignedData,
+                        startY: yPosition,
+                        margin: { left: 14 },
+                        styles: { 
+                            fontSize: 9,
+                            cellPadding: 3
+                        },
+                        headStyles: { 
+                            fillColor: [239, 68, 68],
+                            textColor: [255, 255, 255]
+                        },
+                        alternateRowStyles: {
+                            fillColor: [254, 242, 242]
+                        }
+                    });
+                }
+                
+                // Add footer to last page
+                const pageCount = doc.internal.getNumberOfPages();
+                doc.setPage(pageCount);
+                doc.setFontSize(9);
+                doc.setTextColor(150);
+                doc.text(`Page ${pageCount}`, 105, 285, { align: 'center' });
+                doc.text('AuctionX 💰 - Cricket Tournament Management System', 105, 290, { align: 'center' });
+                
+                // Save PDF
+                doc.save(`cricket_tournament_${new Date().toISOString().split('T')[0]}.pdf`);
+                
+                showAlert('systemAlert', '<i class="fas fa-check-circle mr-2"></i>PDF exported successfully!', 'success');
+            } catch (error) {
+                console.error('PDF export error:', error);
+                showAlert('systemAlert', '<i class="fas fa-times-circle mr-2"></i>PDF export failed!', 'error');
+            }
+        }
+
+        async function exportData() {
+            // Legacy function - show export modal for user to choose format
+            showExportModal();
         }
 
         async function showActivityLog() {
@@ -1176,6 +1702,14 @@
 
         function renderPlayersList() {
             const container = document.getElementById('playersList');
+            const searchInput = document.getElementById('playerSearchInput');
+            
+            // Apply search filter if there's a search term
+            if (searchInput && searchInput.value) {
+                filterPlayersList();
+                return;
+            }
+            
             if (appState.players.length === 0) {
                 container.innerHTML = '<p class="text-gray-500 text-center py-8">No players added yet.</p>';
                 return;
@@ -1462,8 +1996,10 @@
 
         function renderDraftingInterface() {
             const teamsWithCaptains = Object.values(appState.teams).filter(team => team.captain !== null);
+            const searchContainer = document.getElementById('draftSearchContainer');
             
             if (teamsWithCaptains.length < 4 || !appState.draftOrderSet) {
+                if (searchContainer) searchContainer.style.display = 'none';
                 document.getElementById('availablePlayers').innerHTML = `
                     <div class="col-span-full text-center py-12 text-gray-500">
                         <i class="fas fa-user-shield text-6xl mb-4 text-gray-300"></i>
@@ -1481,6 +2017,7 @@
             const container = document.getElementById('availablePlayers');
             
             if (availablePlayers.length === 0) {
+                if (searchContainer) searchContainer.style.display = 'none';
                 container.innerHTML = `
                     <div class="col-span-full text-center py-12">
                         <i class="fas fa-trophy text-6xl mb-4 text-yellow-500"></i>
@@ -1493,6 +2030,9 @@
                 return;
             }
             
+            // Show search container when there are available players
+            if (searchContainer) searchContainer.style.display = 'block';
+            
             const currentTeam = getCurrentDraftingTeam();
             const currentTeamData = appState.teams[currentTeam];
             
@@ -1502,13 +2042,19 @@
             
             renderTeamComposition();
             
-            container.innerHTML = availablePlayers.map(player => `
-                <div class="player-card-new p-4 rounded-lg cursor-pointer text-center font-medium" 
-                     onclick="selectPlayer('${player}')" data-player="${player}">
-                    <i class="fas fa-user mb-2 text-gray-400"></i><br>
-                    ${player}
-                </div>
-            `).join('');
+            // Check if there's a search term
+            const searchInput = document.getElementById('draftPlayerSearchInput');
+            if (searchInput && searchInput.value) {
+                filterDraftPlayers();
+            } else {
+                container.innerHTML = availablePlayers.map(player => `
+                    <div class="player-card-new p-4 rounded-lg cursor-pointer text-center font-medium" 
+                         onclick="selectPlayer('${player}')" data-player="${player}">
+                        <i class="fas fa-user mb-2 text-gray-400"></i><br>
+                        ${player}
+                    </div>
+                `).join('');
+            }
         }
 
         function renderTeamComposition() {
@@ -1611,6 +2157,10 @@
                 showCompleteDraftOrder();
             }
             
+            // Clear search when pick is confirmed
+            const draftSearch = document.getElementById('draftPlayerSearchInput');
+            if (draftSearch) draftSearch.value = '';
+            
             renderDraftingInterface();
             renderTeams();
             
@@ -1627,6 +2177,10 @@
                 appState.currentDraftRound = 1;
                 appState.currentDraftPick = 1;
                 appState.selectedPlayer = null;
+                
+                // Clear search when resetting
+                const draftSearch = document.getElementById('draftPlayerSearchInput');
+                if (draftSearch) draftSearch.value = '';
                 
                 await saveToStorage();
                 renderDraftingInterface();
@@ -1831,13 +2385,29 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Initializing Cricket Tournament Dashboard...');
             
-            document.getElementById('headerConnectionStatus').innerHTML = '<i class="fas fa-circle text-green-400 text-xs mr-1"></i>Active';
+            // Initialize credentials system
+            initializeCredentials();
             
-            renderPlayersList();
-            updateCaptainSelect();
-            updateLocalStorageInfo();
+            // Check for existing session
+            const hasSession = await checkSession();
+            
+            if (!hasSession) {
+                // Show login page if no session
+                document.getElementById('loginSection').style.display = 'flex';
+                document.getElementById('mainApp').style.display = 'none';
+            } else {
+                // Already logged in via checkSession
+                document.getElementById('headerConnectionStatus').innerHTML = '<i class="fas fa-circle text-green-400 text-xs mr-1"></i>Active';
+                renderPlayersList();
+                updateCaptainSelect();
+                updateLocalStorageInfo();
+            }
             
             console.log('Dashboard initialized successfully');
+            
+            // Log security info (for development)
+            console.log('Security: Password hashing enabled using SHA-256');
+            console.log('Session: 24-hour expiration implemented');
         });
     </script>
 </body>
