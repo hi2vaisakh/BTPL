@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Tournament Management Dashboard</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        
+        /* Gradient backgrounds */
+        .gradient-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .gradient-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        
+        .gradient-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        
+        .gradient-dark {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        }
+        
+        /* Glass effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Tab transitions */
+        .tab-transition {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-transition::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        
+        .tab-transition.active::after {
+            width: 100%;
+        }
+        
+        /* Spin wheel styles */
+        .wheel-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto;
+        }
+        
+        .wheel-background {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2), inset 0 0 0 6px #1e293b;
+            transition: transform 4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        
+        .wheel-section {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            clip-path: polygon(0 0, 100% 0, 100% 100%);
+        }
+        
+        .wheel-section.section-1 {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            transform: rotate(0deg);
+            top: 0;
+            left: 50%;
+        }
+        
+        .wheel-section.section-2 {
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+            transform: rotate(90deg);
+            top: 50%;
+            left: 50%;
+        }
+        
+        .wheel-section.section-3 {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            transform: rotate(180deg);
+            top: 50%;
+            left: 0;
+        }
+        
+        .wheel-section.section-4 {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transform: rotate(270deg);
+            top: 0;
+            left: 0;
+        }
+        
+        .section-content {
+            position: absolute;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transform: rotate(-45deg);
+            width: 80px;
+            top: 50%;
+            left: 20%;
+            transform-origin: center;
+        }
+        
+        .section-1 .section-content { transform: rotate(45deg) translateY(-60px); }
+        .section-2 .section-content { transform: rotate(-45deg) translateY(-60px); }
+        .section-3 .section-content { transform: rotate(135deg) translateY(-60px); }
+        .section-4 .section-content { transform: rotate(225deg) translateY(-60px); }
+        
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border: 3px solid #e2e8f0;
+        }
+        
+        .wheel-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 30px solid #dc2626;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            z-index: 20;
+        }
+        
+        /* Button animations */
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-shine::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-shine:hover::before {
+            left: 100%;
+        }
+        
+        /* Player card styles */
+        .player-card-new {
+            background: white;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .player-card-new::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+            opacity: 0.1;
+        }
+        
+        .player-card-new:hover::before {
+            width: 100%;
+        }
+        
+        .player-card-new:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.15);
+        }
+        
+        .player-card-new.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+        
+        /* Notification styles */
+        .notification {
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <!-- Login Section -->
+    <div id="loginSection" class="min-h-screen gradient-primary flex items-center justify-center p-4">
+        <div class="animate__animated animate__fadeIn">
+            <div class="glass rounded-2xl shadow-2xl p-8 md:p-12 max-w-md w-full">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-lg mb-4">
+                        <span class="text-3xl">🏏</span>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Cricket Tournament</h1>
+                    <p class="text-gray-600">Management Dashboard</p>
+                </div>
+                
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-user mr-2"></i>Username
+                        </label>
+                        <input type="text" id="username" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-lock mr-2"></i>Password
+                        </label>
+                        <input type="password" id="password" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200">
+                    </div>
+                    
+                    <button type="submit" class="w-full gradient-primary text-white py-3 rounded-lg font-semibold btn-shine hover:shadow-lg transition duration-300">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                    </button>
+                </form>
+                
+                <div id="loginAlert" class="mt-6"></div>
+                
+                <div class="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                    <p class="text-sm text-gray-700 font-medium mb-2">
+                        <i class="fas fa-info-circle text-purple-600 mr-2"></i>Demo Credentials
+                    </p>
+                    <div class="text-sm text-gray-600 space-y-1">
+                        <p>Username: <code class="bg-white px-2 py-1 rounded">admin</code></p>
+                        <p>Password: <code class="bg-white px-2 py-1 rounded">cricket2024</code></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="mainApp" class="hidden">
+        <!-- Top Navigation Bar -->
+        <nav class="gradient-dark shadow-lg sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-3">🏏</span>
+                            <div>
+                                <h1 class="text-white text-xl font-bold">AuctionX 💰 </h1>
+                                <p class="text-gray-400 text-xs">
+                                    <span id="headerConnectionStatus" class="mr-3">
+                                        <i class="fas fa-circle text-yellow-400 text-xs mr-1"></i>Connecting...
+                                    </span>
+                                    <span>
+                                        <i class="fas fa-user text-xs mr-1"></i>
+                                        <span id="headerCurrentUser">-</span>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Tab Navigation -->
+        <div class="bg-white shadow-sm border-b sticky top-16 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex space-x-8 overflow-x-auto">
+                    <button class="tab-transition active py-4 px-2 text-gray-700 font-medium hover:text-purple-600 whitespace-nowrap" onclick="showTab('players')">
+                        <i class="fas fa-users mr-2"></i>Players
+                    </button>
+                    <button class="tab-transition py-4 px-2 text-gray-700 font-medium hover:text-purple-600 whitespace-nowrap" onclick="showTab('captains')">
+                        <i class="fas fa-user-shield mr-2"></i>Captains
+                    </button>
+                    <button class="tab-transition py-4 px-2 text-gray-700 font-medium hover:text-purple-600 whitespace-nowrap" onclick="showTab('drafting')">
+                        <i class="fas fa-dice mr-2"></i>Drafting
+                    </button>
+                    <button class="tab-transition py-4 px-2 text-gray-700 font-medium hover:text-purple-600 whitespace-nowrap" onclick="showTab('teams')">
+                        <i class="fas fa-people-group mr-2"></i>Teams
+                    </button>
+                    <button class="tab-transition py-4 px-2 text-gray-700 font-medium hover:text-purple-600 whitespace-nowrap" onclick="showTab('exchange')">
+                        <i class="fas fa-exchange-alt mr-2"></i>Exchange
+                    </button>
+                    <button class="tab-transition py-4 px-2 text-gray-700 font-medium hover:text-purple-600 whitespace-nowrap" onclick="showTab('system')">
+                        <i class="fas fa-cog mr-2"></i>System
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- Players Tab -->
+            <div id="players" class="tab-content">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-users mr-3 text-purple-600"></i>
+                        Player Management
+                    </h2>
+                    <p class="text-gray-600 mt-2">Add and manage tournament players</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <!-- Upload Players Card -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-upload mr-2 text-blue-600"></i>
+                            Bulk Upload Players
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select CSV/Text File</label>
+                                <input type="file" id="playerFile" accept=".csv,.txt" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <button onclick="uploadPlayers()" class="w-full gradient-info text-white py-2 rounded-lg font-medium btn-shine">
+                                <i class="fas fa-cloud-upload-alt mr-2"></i>Upload Players
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add Single Player Card -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-user-plus mr-2 text-green-600"></i>
+                            Add Individual Player
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Player Name</label>
+                                <input type="text" id="playerName" placeholder="Enter player name" 
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <button onclick="addSinglePlayer()" class="w-full gradient-success text-white py-2 rounded-lg font-medium btn-shine">
+                                <i class="fas fa-plus mr-2"></i>Add Player
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="playersAlert"></div>
+
+                <!-- Players List -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-list mr-2 text-purple-600"></i>
+                        Registered Players
+                    </h3>
+                    <div id="playersList" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- Captains Tab -->
+            <div id="captains" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-user-shield mr-3 text-purple-600"></i>
+                        Team & Captain Setup
+                    </h2>
+                    <p class="text-gray-600 mt-2">Configure team names and assign team captains</p>
+                </div>
+
+                <!-- Team Names Configuration -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-edit mr-2 text-blue-600"></i>
+                        Customize Team Names
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Team 1</label>
+                            <input type="text" id="team1Name" value="Team 1" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Team 2</label>
+                            <input type="text" id="team2Name" value="Team 2" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Team 3</label>
+                            <input type="text" id="team3Name" value="Team 3" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Team 4</label>
+                            <input type="text" id="team4Name" value="Team 4" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                    <button onclick="updateTeamNames()" class="gradient-primary text-white px-6 py-2 rounded-lg font-medium btn-shine">
+                        <i class="fas fa-save mr-2"></i>Update Team Names
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Manual Captain Assignment -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-hand-pointer mr-2 text-green-600"></i>
+                            Manual Captain Assignment
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Player</label>
+                                <select id="captainSelectManual" size="6" 
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Assign to Team</label>
+                                <select id="teamSelectForCaptain" 
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Select Team</option>
+                                </select>
+                            </div>
+                            <button onclick="assignCaptainToTeam()" class="w-full gradient-success text-white py-2 rounded-lg font-medium btn-shine">
+                                <i class="fas fa-user-check mr-2"></i>Assign Captain
+                            </button>
+                        </div>
+
+                        <!-- Current Assignments -->
+                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <h4 class="font-semibold text-gray-800 mb-3">Current Assignments</h4>
+                            <div id="currentAssignments" class="space-y-2">
+                                <div class="assignment-item flex justify-between items-center py-2 border-b border-gray-200">
+                                    <span class="team-label font-medium">Team 1:</span>
+                                    <span id="captain1" class="captain-name text-gray-500">Not assigned</span>
+                                </div>
+                                <div class="assignment-item flex justify-between items-center py-2 border-b border-gray-200">
+                                    <span class="team-label font-medium">Team 2:</span>
+                                    <span id="captain2" class="captain-name text-gray-500">Not assigned</span>
+                                </div>
+                                <div class="assignment-item flex justify-between items-center py-2 border-b border-gray-200">
+                                    <span class="team-label font-medium">Team 3:</span>
+                                    <span id="captain3" class="captain-name text-gray-500">Not assigned</span>
+                                </div>
+                                <div class="assignment-item flex justify-between items-center py-2">
+                                    <span class="team-label font-medium">Team 4:</span>
+                                    <span id="captain4" class="captain-name text-gray-500">Not assigned</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Random Captain Assignment -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-random mr-2 text-purple-600"></i>
+                            Random Captain Assignment
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Select 4 Players (Hold Ctrl/Cmd to select multiple)
+                                </label>
+                                <select id="captainSelectRandom" multiple size="8" 
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                </select>
+                            </div>
+                            <button onclick="randomlyAssignCaptains()" class="w-full gradient-primary text-white py-2 rounded-lg font-medium btn-shine">
+                                <i class="fas fa-dice mr-2"></i>Randomly Assign Captains
+                            </button>
+                        </div>
+                        <div id="randomAssignResult" class="mt-4"></div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-center gap-4 mt-8">
+                    <button onclick="clearAllCaptains()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200">
+                        <i class="fas fa-trash mr-2"></i>Clear All Captains
+                    </button>
+                    <button onclick="finalizeTeamSetup()" class="gradient-success text-white px-8 py-3 rounded-lg font-medium btn-shine">
+                        <i class="fas fa-check-circle mr-2"></i>Finalize Team Setup
+                    </button>
+                </div>
+
+                <div id="captainsAlert" class="mt-6"></div>
+            </div>
+
+            <!-- Drafting Tab -->
+            <div id="drafting" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-dice mr-3 text-purple-600"></i>
+                        Player Drafting
+                    </h2>
+                    <p class="text-gray-600 mt-2">Determine draft order and select players for teams</p>
+                </div>
+
+                <!-- Draft Order Wheel -->
+                <div id="draftOrderSection" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">
+                        <i class="fas fa-trophy mr-2 text-yellow-500"></i>
+                        Determine Draft Order
+                    </h3>
+                    <p class="text-center text-gray-600 mb-8">Spin the wheel to determine which team gets the first pick</p>
+                    
+                    <div class="flex justify-center">
+                        <div id="enhancedSpinWheel">
+                            <div class="wheel-container">
+                                <div class="wheel-background">
+                                    <div class="wheel-section section-1" data-team="1">
+                                        <div class="section-content">
+                                            <div class="team-name text-sm font-bold">Team 1</div>
+                                            <div class="captain-name text-xs" id="wheelCaptain1">Captain</div>
+                                        </div>
+                                    </div>
+                                    <div class="wheel-section section-2" data-team="2">
+                                        <div class="section-content">
+                                            <div class="team-name text-sm font-bold">Team 2</div>
+                                            <div class="captain-name text-xs" id="wheelCaptain2">Captain</div>
+                                        </div>
+                                    </div>
+                                    <div class="wheel-section section-3" data-team="3">
+                                        <div class="section-content">
+                                            <div class="team-name text-sm font-bold">Team 3</div>
+                                            <div class="captain-name text-xs" id="wheelCaptain3">Captain</div>
+                                        </div>
+                                    </div>
+                                    <div class="wheel-section section-4" data-team="4">
+                                        <div class="section-content">
+                                            <div class="team-name text-sm font-bold">Team 4</div>
+                                            <div class="captain-name text-xs" id="wheelCaptain4">Captain</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="wheel-center">
+                                    <span class="text-3xl">🏏</span>
+                                </div>
+                            </div>
+                            <div class="wheel-pointer"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-8">
+                        <button onclick="spinDraftWheel()" id="draftSpinBtn" 
+                                class="gradient-primary text-white px-8 py-3 rounded-lg font-semibold text-lg btn-shine">
+                            <i class="fas fa-dice mr-2"></i>Spin for Draft Order
+                        </button>
+                    </div>
+                    
+                    <div id="draftOrderResult" class="mt-6"></div>
+                </div>
+
+                <!-- Draft Order Display -->
+                <div id="draftOrderDisplay" class="hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-list-ol mr-2 text-purple-600"></i>
+                        Complete Draft Order
+                    </h3>
+                    <div id="allRoundsDraftOrder"></div>
+                </div>
+
+                <!-- Current Pick Info -->
+                <div id="draftingInfo" class="hidden bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl shadow-lg p-6 mb-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-2xl font-bold" id="currentPick">Waiting to start...</div>
+                            <div class="text-purple-200 mt-2">
+                                <span class="mr-4">
+                                    <i class="fas fa-layer-group mr-1"></i>
+                                    Round <span id="currentRound">1</span>
+                                </span>
+                                <span>
+                                    <i class="fas fa-hashtag mr-1"></i>
+                                    Pick <span id="currentPickNumber">1</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="text-5xl opacity-20">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Composition -->
+                <div id="teamComposition"></div>
+
+                <!-- Available Players -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-users mr-2 text-green-600"></i>
+                        Available Players
+                    </h3>
+                    <div id="availablePlayers" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"></div>
+                </div>
+
+                <!-- Draft Actions -->
+                <div id="draftActions" class="hidden mt-6 flex justify-center gap-4">
+                    <button onclick="confirmPick()" id="confirmPickBtn" disabled 
+                            class="gradient-success text-white px-8 py-3 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed btn-shine">
+                        <i class="fas fa-check mr-2"></i>Confirm Selection
+                    </button>
+                    <button onclick="resetDraft()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-redo mr-2"></i>Reset Draft
+                    </button>
+                </div>
+
+                <div id="draftingAlert" class="mt-6"></div>
+            </div>
+
+            <!-- Teams Tab -->
+            <div id="teams" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-people-group mr-3 text-purple-600"></i>
+                        Team Overview
+                    </h2>
+                    <p class="text-gray-600 mt-2">View and manage team compositions</p>
+                </div>
+
+                <div id="teamsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6"></div>
+            </div>
+
+            <!-- Exchange Tab -->
+            <div id="exchange" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-exchange-alt mr-3 text-purple-600"></i>
+                        Player Exchange
+                    </h2>
+                    <p class="text-gray-600 mt-2">Trade players between teams</p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- From Team -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="fas fa-arrow-right mr-2 text-red-600"></i>
+                                From Team
+                            </h3>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Team</label>
+                                <select id="fromTeam" onchange="loadTeamPlayers('from')" 
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Select Team</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Player</label>
+                                <select id="fromPlayer" 
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Select Player</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- To Team -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="fas fa-arrow-left mr-2 text-green-600"></i>
+                                To Team
+                            </h3>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Team</label>
+                                <select id="toTeam" onchange="loadTeamPlayers('to')" 
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Select Team</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Player</label>
+                                <select id="toPlayer" 
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                    <option value="">Select Player</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 flex justify-center">
+                        <button onclick="exchangePlayers()" class="gradient-primary text-white px-8 py-3 rounded-lg font-semibold btn-shine">
+                            <i class="fas fa-exchange-alt mr-2"></i>Exchange Players
+                        </button>
+                    </div>
+                </div>
+
+                <div id="exchangeAlert" class="mt-6"></div>
+            </div>
+
+            <!-- System Tab -->
+            <div id="system" class="tab-content hidden">
+                <div class="mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-cog mr-3 text-purple-600"></i>
+                        System Management
+                    </h2>
+                    <p class="text-gray-600 mt-2">Monitor system status and manage data</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Database Status -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-database mr-2 text-blue-600"></i>
+                            Database Status
+                        </h3>
+                        <div id="redisStatus" class="space-y-3">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-gray-600">Connection Status</span>
+                                <span id="connectionStatus" class="font-medium">Checking...</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-gray-600">Storage Mode</span>
+                                <span id="storageMode" class="font-medium">Local Storage</span>
+                            </div>
+                        </div>
+                        <button onclick="checkRedisConnection()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium transition duration-200">
+                            <i class="fas fa-sync mr-2"></i>Test Connection
+                        </button>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-folder-open mr-2 text-green-600"></i>
+                            Data Management
+                        </h3>
+                        <div class="space-y-3">
+                            <button onclick="exportData()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition duration-200">
+                                <i class="fas fa-download mr-2"></i>Export Data
+                            </button>
+                            <button onclick="showActivityLog()" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-medium transition duration-200">
+                                <i class="fas fa-history mr-2"></i>View Activity Log
+                            </button>
+                            <button onclick="clearAllData()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-medium transition duration-200">
+                                <i class="fas fa-trash mr-2"></i>Clear All Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Info -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-info-circle mr-2 text-purple-600"></i>
+                        Application Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-gray-600 text-sm">Version</p>
+                            <p class="text-xl font-semibold text-gray-800">2.0.0</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-gray-600 text-sm">Total Players</p>
+                            <p class="text-xl font-semibold text-gray-800" id="totalPlayers">0</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-gray-600 text-sm">Current User</p>
+                            <p class="text-xl font-semibold text-gray-800" id="currentUser">-</p>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-gray-600 text-sm">Last Modified</p>
+                            <p class="text-lg font-semibold text-gray-800" id="lastModified">-</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <h4 class="font-semibold text-gray-800 mb-2">
+                            <i class="fas fa-hdd mr-2 text-blue-600"></i>
+                            Storage Information
+                        </h4>
+                        <div id="localStorageInfo" class="text-sm text-gray-600"></div>
+                        <p class="mt-2 text-sm">
+                            <span class="font-medium">Storage Size:</span> 
+                            <span id="storageSize" class="text-blue-600 font-semibold">0 KB</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div id="systemAlert" class="mt-6"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Log Modal -->
+    <div id="activityLogModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden m-4">
+            <div class="gradient-primary text-white p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold">
+                        <i class="fas fa-history mr-2"></i>Activity Log
+                    </h2>
+                    <button onclick="closeActivityLog()" class="text-white hover:text-gray-200 transition duration-200">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="activityLogContent" class="p-6 overflow-y-auto max-h-[60vh]"></div>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        let appState = {
+            players: [],
+            teams: {
+                1: { name: 'Team 1', players: [], captain: null },
+                2: { name: 'Team 2', players: [], captain: null },
+                3: { name: 'Team 3', players: [], captain: null },
+                4: { name: 'Team 4', players: [], captain: null }
+            },
+            captains: [],
+            currentDraftRound: 1,
+            currentDraftPick: 1,
+            round1Order: null,
+            draftOrder: null,
+            draftOrderSet: false,
+            selectedPlayer: null,
+            isLoggedIn: false,
+            currentUser: null
+        };
+
+        // Simple Storage Implementation (using localStorage)
+        class SimpleStorage {
+            async set(key, value) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                    return true;
+                } catch (error) {
+                    console.error('Storage error:', error);
+                    return false;
+                }
+            }
+
+            async get(key) {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : null;
+                } catch (error) {
+                    console.error('Storage error:', error);
+                    return null;
+                }
+            }
+
+            async del(key) {
+                try {
+                    localStorage.removeItem(key);
+                    return true;
+                } catch (error) {
+                    return false;
+                }
+            }
+        }
+
+        const storage = new SimpleStorage();
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === 'admin' && password === 'cricket2024') {
+                appState.isLoggedIn = true;
+                appState.currentUser = username;
+                
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('mainApp').classList.remove('hidden');
+                
+                await loadFromStorage();
+                await updateSystemInfo();
+                
+                showAlert('loginAlert', '<i class="fas fa-check-circle mr-2"></i>Login successful!', 'success');
+            } else {
+                showAlert('loginAlert', '<i class="fas fa-times-circle mr-2"></i>Invalid credentials!', 'error');
+            }
+        });
+
+        async function logout() {
+            appState.isLoggedIn = false;
+            appState.currentUser = null;
+            document.getElementById('loginSection').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // Tab Management
+        function showTab(tabName) {
+            // Update tab states
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            document.querySelectorAll('.tab-transition').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.remove('hidden');
+            event.target.classList.add('active');
+            
+            // Refresh content based on tab
+            if (tabName === 'teams') {
+                renderTeams();
+            } else if (tabName === 'drafting') {
+                updateWheelTeamNames();
+                if (appState.draftOrderSet) {
+                    document.getElementById('draftOrderSection').style.display = 'none';
+                    document.getElementById('draftOrderDisplay').classList.remove('hidden');
+                    document.getElementById('draftingInfo').classList.remove('hidden');
+                    document.getElementById('draftActions').classList.remove('hidden');
+                    showCompleteDraftOrder();
+                } else {
+                    document.getElementById('draftOrderSection').style.display = 'block';
+                    document.getElementById('draftOrderDisplay').classList.add('hidden');
+                    document.getElementById('draftingInfo').classList.add('hidden');
+                    document.getElementById('draftActions').classList.add('hidden');
+                }
+                renderDraftingInterface();
+            } else if (tabName === 'players') {
+                renderPlayersList();
+            } else if (tabName === 'captains') {
+                document.getElementById('team1Name').value = appState.teams[1].name;
+                document.getElementById('team2Name').value = appState.teams[2].name;
+                document.getElementById('team3Name').value = appState.teams[3].name;
+                document.getElementById('team4Name').value = appState.teams[4].name;
+                updateCaptainSelect();
+                updateCurrentAssignments();
+            } else if (tabName === 'exchange') {
+                updateExchangeTeamSelects();
+            } else if (tabName === 'system') {
+                updateSystemInfo();
+            }
+        }
+
+        // System Management Functions
+        async function checkRedisConnection() {
+            const statusElement = document.getElementById('connectionStatus');
+            statusElement.innerHTML = '<i class="fas fa-check-circle text-green-600"></i> Local Storage Active';
+            document.getElementById('storageMode').textContent = 'Local Storage';
+            document.getElementById('headerConnectionStatus').innerHTML = '<i class="fas fa-circle text-green-400 text-xs mr-1"></i>Active';
+        }
+
+        async function updateSystemInfo() {
+            await checkRedisConnection();
+            
+            document.getElementById('totalPlayers').textContent = appState.players.length;
+            document.getElementById('currentUser').textContent = appState.currentUser || 'Unknown';
+            document.getElementById('headerCurrentUser').textContent = appState.currentUser || 'Unknown';
+            
+            const savedData = await storage.get('cricket_tournament_data');
+            if (savedData && savedData.lastModified) {
+                document.getElementById('lastModified').textContent = new Date(savedData.lastModified).toLocaleString();
+            } else {
+                document.getElementById('lastModified').textContent = 'Never';
+            }
+            
+            updateLocalStorageInfo();
+        }
+
+        function updateLocalStorageInfo() {
+            try {
+                let totalSize = 0;
+                let keyCount = 0;
+                
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.includes('cricket')) {
+                        const value = localStorage.getItem(key);
+                        keyCount++;
+                        totalSize += (key.length + (value ? value.length : 0)) * 2;
+                    }
+                }
+                
+                document.getElementById('localStorageInfo').innerHTML = keyCount > 0 ? 
+                    `${keyCount} items stored` : 'No data stored';
+                document.getElementById('storageSize').textContent = `${(totalSize / 1024).toFixed(2)} KB`;
+                
+            } catch (error) {
+                console.error('Error reading localStorage:', error);
+            }
+        }
+
+        async function exportData() {
+            try {
+                const dataToExport = {
+                    ...appState,
+                    exportedAt: new Date().toISOString(),
+                    exportedBy: appState.currentUser
+                };
+                
+                const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `cricket_tournament_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showAlert('systemAlert', '<i class="fas fa-check-circle mr-2"></i>Data exported successfully!', 'success');
+            } catch (error) {
+                showAlert('systemAlert', '<i class="fas fa-times-circle mr-2"></i>Export failed!', 'error');
+            }
+        }
+
+        async function showActivityLog() {
+            const modal = document.getElementById('activityLogModal');
+            document.getElementById('activityLogContent').innerHTML = '<p class="text-gray-500 text-center">No activity recorded yet.</p>';
+            modal.style.display = 'flex';
+        }
+
+        function closeActivityLog() {
+            document.getElementById('activityLogModal').style.display = 'none';
+        }
+
+        // Player Management
+        async function uploadPlayers() {
+            const fileInput = document.getElementById('playerFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAlert('playersAlert', '<i class="fas fa-exclamation-circle mr-2"></i>Please select a file!', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const content = e.target.result;
+                const players = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+                
+                appState.players = [...new Set([...appState.players, ...players])];
+                await saveToStorage();
+                renderPlayersList();
+                updateCaptainSelect();
+                showAlert('playersAlert', `<i class="fas fa-check-circle mr-2"></i>${players.length} players uploaded!`, 'success');
+            };
+            reader.readAsText(file);
+        }
+
+        async function addSinglePlayer() {
+            const playerName = document.getElementById('playerName').value.trim();
+            if (!playerName) {
+                showAlert('playersAlert', '<i class="fas fa-exclamation-circle mr-2"></i>Enter a player name!', 'error');
+                return;
+            }
+            
+            if (appState.players.includes(playerName)) {
+                showAlert('playersAlert', '<i class="fas fa-exclamation-circle mr-2"></i>Player already exists!', 'error');
+                return;
+            }
+            
+            appState.players.push(playerName);
+            document.getElementById('playerName').value = '';
+            await saveToStorage();
+            renderPlayersList();
+            updateCaptainSelect();
+            showAlert('playersAlert', `<i class="fas fa-check-circle mr-2"></i>${playerName} added!`, 'success');
+        }
+
+        async function removePlayer(playerName) {
+            if (confirm(`Remove ${playerName}?`)) {
+                appState.players = appState.players.filter(p => p !== playerName);
+                
+                Object.values(appState.teams).forEach(team => {
+                    team.players = team.players.filter(p => p !== playerName);
+                    if (team.captain === playerName) {
+                        team.captain = null;
+                    }
+                });
+                
+                await saveToStorage();
+                renderPlayersList();
+                updateCaptainSelect();
+                renderTeams();
+            }
+        }
+
+        function renderPlayersList() {
+            const container = document.getElementById('playersList');
+            if (appState.players.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">No players added yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = appState.players.map(player => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
+                    <span class="font-medium text-gray-800">${player}</span>
+                    <button onclick="removePlayer('${player}')" class="text-red-600 hover:text-red-700">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function updateCaptainSelect() {
+            const manualSelect = document.getElementById('captainSelectManual');
+            const randomSelect = document.getElementById('captainSelectRandom');
+            
+            const assignedCaptains = Object.values(appState.teams)
+                .map(team => team.captain)
+                .filter(captain => captain !== null);
+            
+            const availablePlayers = appState.players.filter(p => !assignedCaptains.includes(p));
+            
+            const playerOptions = availablePlayers.map(player => 
+                `<option value="${player}">${player}</option>`
+            ).join('');
+            
+            if (manualSelect) manualSelect.innerHTML = playerOptions;
+            if (randomSelect) randomSelect.innerHTML = playerOptions;
+            
+            updateCurrentAssignments();
+        }
+
+        function updateCurrentAssignments() {
+            for (let i = 1; i <= 4; i++) {
+                const captainElement = document.getElementById(`captain${i}`);
+                const teamLabelElement = document.querySelector(`#currentAssignments .assignment-item:nth-child(${i}) .team-label`);
+                
+                if (captainElement) {
+                    const captain = appState.teams[i].captain;
+                    const teamName = appState.teams[i].name;
+                    
+                    if (captain) {
+                        captainElement.innerHTML = `<i class="fas fa-check-circle text-green-600 mr-1"></i>${captain}`;
+                        captainElement.className = 'captain-name text-green-600 font-medium';
+                    } else {
+                        captainElement.textContent = 'Not assigned';
+                        captainElement.className = 'captain-name text-gray-500';
+                    }
+                    
+                    if (teamLabelElement) {
+                        teamLabelElement.textContent = `${teamName}:`;
+                    }
+                }
+            }
+            
+            const teamSelect = document.getElementById('teamSelectForCaptain');
+            if (teamSelect) {
+                teamSelect.innerHTML = `
+                    <option value="">Select Team</option>
+                    ${[1,2,3,4].map(i => `<option value="${i}">${appState.teams[i].name}</option>`).join('')}
+                `;
+            }
+        }
+
+        // Team Management Functions
+        async function updateTeamNames() {
+            appState.teams[1].name = document.getElementById('team1Name').value.trim() || 'Team 1';
+            appState.teams[2].name = document.getElementById('team2Name').value.trim() || 'Team 2';
+            appState.teams[3].name = document.getElementById('team3Name').value.trim() || 'Team 3';
+            appState.teams[4].name = document.getElementById('team4Name').value.trim() || 'Team 4';
+            
+            await saveToStorage();
+            updateCurrentAssignments();
+            updateExchangeTeamSelects();
+            renderTeams();
+            showAlert('captainsAlert', '<i class="fas fa-check-circle mr-2"></i>Team names updated!', 'success');
+        }
+
+        async function assignCaptainToTeam() {
+            const selectedPlayer = document.getElementById('captainSelectManual').value;
+            const selectedTeam = document.getElementById('teamSelectForCaptain').value;
+            
+            if (!selectedPlayer || !selectedTeam) {
+                showAlert('captainsAlert', '<i class="fas fa-exclamation-circle mr-2"></i>Select player and team!', 'error');
+                return;
+            }
+            
+            if (appState.teams[selectedTeam].captain) {
+                if (!confirm(`Replace ${appState.teams[selectedTeam].captain}?`)) return;
+                appState.teams[selectedTeam].players = appState.teams[selectedTeam].players.filter(
+                    p => p !== appState.teams[selectedTeam].captain
+                );
+            }
+            
+            appState.teams[selectedTeam].captain = selectedPlayer;
+            appState.teams[selectedTeam].players = [selectedPlayer, ...appState.teams[selectedTeam].players.filter(p => p !== selectedPlayer)];
+            
+            await saveToStorage();
+            updateCaptainSelect();
+            renderTeams();
+            showAlert('captainsAlert', `<i class="fas fa-check-circle mr-2"></i>${selectedPlayer} assigned!`, 'success');
+        }
+
+        async function randomlyAssignCaptains() {
+            const select = document.getElementById('captainSelectRandom');
+            const selectedOptions = Array.from(select.selectedOptions);
+            
+            if (selectedOptions.length !== 4) {
+                showAlert('captainsAlert', '<i class="fas fa-exclamation-circle mr-2"></i>Select exactly 4 players!', 'error');
+                return;
+            }
+            
+            const selectedCaptains = selectedOptions.map(option => option.value);
+            const shuffled = [...selectedCaptains].sort(() => Math.random() - 0.5);
+            
+            for (let i = 1; i <= 4; i++) {
+                appState.teams[i].captain = shuffled[i-1];
+                appState.teams[i].players = [shuffled[i-1]];
+            }
+            
+            await saveToStorage();
+            updateCaptainSelect();
+            renderTeams();
+            
+            document.getElementById('randomAssignResult').innerHTML = 
+                `<div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <p class="font-semibold text-green-800">✓ Captains assigned!</p>
+                </div>`;
+        }
+
+        function updateWheelTeamNames() {
+            for (let i = 1; i <= 4; i++) {
+                const teamNameEl = document.querySelector(`#enhancedSpinWheel .section-${i} .team-name`);
+                const captainNameEl = document.getElementById(`wheelCaptain${i}`);
+                
+                if (teamNameEl) teamNameEl.textContent = appState.teams[i].name;
+                if (captainNameEl) captainNameEl.textContent = appState.teams[i].captain || 'No Captain';
+            }
+        }
+
+        async function spinDraftWheel() {
+            const teamsWithCaptains = Object.values(appState.teams).filter(team => team.captain !== null);
+            
+            if (teamsWithCaptains.length < 4) {
+                showAlert('draftingAlert', '<i class="fas fa-exclamation-circle mr-2"></i>Assign all captains first!', 'error');
+                return;
+            }
+            
+            const wheel = document.querySelector('#enhancedSpinWheel .wheel-background');
+            const btn = document.getElementById('draftSpinBtn');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Spinning...';
+            
+            const rotation = Math.random() * 720 + 1800;
+            wheel.style.transform = `rotate(${rotation}deg)`;
+            
+            setTimeout(async () => {
+                const normalizedRotation = rotation % 360;
+                let winningTeam;
+                
+                if (normalizedRotation >= 315 || normalizedRotation < 45) winningTeam = 1;
+                else if (normalizedRotation >= 45 && normalizedRotation < 135) winningTeam = 2;
+                else if (normalizedRotation >= 135 && normalizedRotation < 225) winningTeam = 3;
+                else winningTeam = 4;
+                
+                const round1Order = [];
+                for (let i = 0; i < 4; i++) {
+                    round1Order.push(((winningTeam + i - 1) % 4) + 1);
+                }
+                
+                appState.draftOrder = [
+                    round1Order,
+                    rotateArray(round1Order, 1),
+                    rotateArray(round1Order, 2),
+                    rotateArray(round1Order, 3)
+                ];
+                appState.draftOrderSet = true;
+                appState.currentDraftRound = 1;
+                appState.currentDraftPick = 1;
+                
+                await saveToStorage();
+                
+                showDraftOrderResult(winningTeam);
+                showCompleteDraftOrder();
+                
+                document.getElementById('draftOrderSection').style.display = 'none';
+                document.getElementById('draftOrderDisplay').classList.remove('hidden');
+                document.getElementById('draftingInfo').classList.remove('hidden');
+                document.getElementById('draftActions').classList.remove('hidden');
+                
+                renderDraftingInterface();
+                
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-dice mr-2"></i>Spin for Draft Order';
+            }, 4000);
+        }
+
+        function rotateArray(arr, positions) {
+            const result = [...arr];
+            for (let i = 0; i < positions; i++) {
+                result.push(result.shift());
+            }
+            return result;
+        }
+
+        function showDraftOrderResult(winningTeam) {
+            const team = appState.teams[winningTeam];
+            document.getElementById('draftOrderResult').innerHTML = `
+                <div class="mt-6 p-6 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-xl text-white text-center">
+                    <h3 class="text-2xl font-bold mb-2">🎉 ${team.name} gets first pick!</h3>
+                    <p class="text-yellow-100">Captain: ${team.captain}</p>
+                </div>
+            `;
+        }
+
+        function showCompleteDraftOrder() {
+            const rounds = ['Round 1', 'Round 2', 'Round 3', 'Round 4'];
+            const roundsHtml = rounds.map((roundName, roundIndex) => {
+                const order = appState.draftOrder[roundIndex];
+                const picksHtml = order.map((teamId, pickIndex) => {
+                    const team = appState.teams[teamId];
+                    return `
+                        <li class="p-3 bg-gray-50 rounded-lg mb-2 flex justify-between items-center">
+                            <span class="font-medium">${team.name}</span>
+                            <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-sm">Pick ${pickIndex + 1}</span>
+                        </li>
+                    `;
+                }).join('');
+                
+                return `
+                    <div class="bg-white rounded-lg border border-gray-200 p-4">
+                        <h4 class="font-semibold text-gray-800 mb-3 text-center">${roundName}</h4>
+                        <ul>${picksHtml}</ul>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('allRoundsDraftOrder').innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">${roundsHtml}</div>
+            `;
+        }
+
+        async function clearAllCaptains() {
+            if (confirm('Clear all captain assignments?')) {
+                for (let i = 1; i <= 4; i++) {
+                    appState.teams[i].captain = null;
+                    appState.teams[i].players = [];
+                }
+                
+                await saveToStorage();
+                updateCaptainSelect();
+                renderTeams();
+                showAlert('captainsAlert', '<i class="fas fa-check-circle mr-2"></i>Captains cleared!', 'success');
+            }
+        }
+
+        async function finalizeTeamSetup() {
+            const assignedTeams = Object.values(appState.teams).filter(team => team.captain !== null);
+            
+            if (assignedTeams.length < 4) {
+                showAlert('captainsAlert', `<i class="fas fa-exclamation-circle mr-2"></i>Only ${assignedTeams.length}/4 teams have captains!`, 'error');
+                return;
+            }
+            
+            if (confirm('Finalize and proceed to drafting?')) {
+                await saveToStorage();
+                showAlert('captainsAlert', '<i class="fas fa-check-circle mr-2"></i>Team setup finalized!', 'success');
+                setTimeout(() => showTab('drafting'), 1500);
+            }
+        }
+
+        function updateExchangeTeamSelects() {
+            const teamOptions = [1, 2, 3, 4].map(i => 
+                `<option value="${i}">${appState.teams[i].name}</option>`
+            ).join('');
+            
+            document.getElementById('fromTeam').innerHTML = '<option value="">Select Team</option>' + teamOptions;
+            document.getElementById('toTeam').innerHTML = '<option value="">Select Team</option>' + teamOptions;
+        }
+
+        function renderDraftingInterface() {
+            const teamsWithCaptains = Object.values(appState.teams).filter(team => team.captain !== null);
+            
+            if (teamsWithCaptains.length < 4 || !appState.draftOrderSet) {
+                document.getElementById('availablePlayers').innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <i class="fas fa-user-shield text-6xl mb-4 text-gray-300"></i>
+                        <h3 class="text-xl font-semibold mb-2">Setup Required</h3>
+                        <p>Complete captain assignment and spin the wheel</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const availablePlayers = appState.players.filter(player => 
+                !Object.values(appState.teams).some(team => team.players.includes(player))
+            );
+            
+            const container = document.getElementById('availablePlayers');
+            
+            if (availablePlayers.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-trophy text-6xl mb-4 text-yellow-500"></i>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">Drafting Complete!</h3>
+                        <p class="text-gray-600">All players have been assigned</p>
+                    </div>
+                `;
+                document.getElementById('currentPick').textContent = 'Drafting complete!';
+                renderTeamComposition();
+                return;
+            }
+            
+            const currentTeam = getCurrentDraftingTeam();
+            const currentTeamData = appState.teams[currentTeam];
+            
+            document.getElementById('currentPick').textContent = `${currentTeamData.name} (Captain: ${currentTeamData.captain}) - Pick a player`;
+            document.getElementById('currentRound').textContent = appState.currentDraftRound;
+            document.getElementById('currentPickNumber').textContent = appState.currentDraftPick;
+            
+            renderTeamComposition();
+            
+            container.innerHTML = availablePlayers.map(player => `
+                <div class="player-card-new p-4 rounded-lg cursor-pointer text-center font-medium" 
+                     onclick="selectPlayer('${player}')" data-player="${player}">
+                    <i class="fas fa-user mb-2 text-gray-400"></i><br>
+                    ${player}
+                </div>
+            `).join('');
+        }
+
+        function renderTeamComposition() {
+            const teamCompositionHtml = Object.entries(appState.teams).map(([teamId, team]) => {
+                const playersHtml = team.players.map(player => {
+                    const isCaptain = player === team.captain;
+                    return `
+                        <li class="flex items-center ${isCaptain ? 'font-semibold text-purple-700' : 'text-gray-700'}">
+                            ${isCaptain ? '<i class="fas fa-crown text-yellow-500 mr-2"></i>' : '<i class="fas fa-user text-gray-400 mr-2"></i>'}
+                            ${player}
+                        </li>
+                    `;
+                }).join('');
+                
+                return `
+                    <div class="bg-white rounded-lg border-2 border-gray-200 p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-bold text-gray-800">${team.name}</h4>
+                            <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-sm font-medium">
+                                ${team.players.length}/12
+                            </span>
+                        </div>
+                        <ul class="space-y-1 text-sm">
+                            ${playersHtml || '<li class="text-gray-400 italic">No players yet</li>'}
+                        </ul>
+                    </div>
+                `;
+            }).join('');
+
+            let compositionSection = document.getElementById('teamComposition');
+            if (!compositionSection) {
+                const draftingInfo = document.getElementById('draftingInfo');
+                if (draftingInfo) {
+                    const compositionDiv = document.createElement('div');
+                    compositionDiv.id = 'teamComposition';
+                    compositionDiv.className = 'mb-6';
+                    draftingInfo.parentNode.insertBefore(compositionDiv, draftingInfo.nextSibling);
+                    compositionSection = compositionDiv;
+                }
+            }
+
+            if (compositionSection) {
+                compositionSection.innerHTML = `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-users mr-2 text-purple-600"></i>
+                            Current Team Compositions
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            ${teamCompositionHtml}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function getCurrentDraftingTeam() {
+            if (!appState.draftOrderSet || !appState.draftOrder) return 1;
+            
+            const roundIndex = (appState.currentDraftRound - 1) % 4;
+            const pickIndex = (appState.currentDraftPick - 1) % 4;
+            return appState.draftOrder[roundIndex][pickIndex];
+        }
+
+        function selectPlayer(playerName) {
+            document.querySelectorAll('.player-card-new').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            const playerCard = document.querySelector(`[data-player="${playerName}"]`);
+            playerCard.classList.add('selected');
+            
+            appState.selectedPlayer = playerName;
+            document.getElementById('confirmPickBtn').disabled = false;
+        }
+
+        async function confirmPick() {
+            if (!appState.selectedPlayer) {
+                showAlert('draftingAlert', '<i class="fas fa-exclamation-circle mr-2"></i>Select a player!', 'error');
+                return;
+            }
+            
+            const currentTeam = getCurrentDraftingTeam();
+            const teamName = appState.teams[currentTeam].name;
+            appState.teams[currentTeam].players.push(appState.selectedPlayer);
+            
+            const pickedPlayer = appState.selectedPlayer;
+            appState.selectedPlayer = null;
+            
+            appState.currentDraftPick++;
+            
+            if (appState.currentDraftPick > 4) {
+                appState.currentDraftPick = 1;
+                appState.currentDraftRound++;
+            }
+            
+            await saveToStorage();
+            
+            if (appState.draftOrderSet) {
+                showCompleteDraftOrder();
+            }
+            
+            renderDraftingInterface();
+            renderTeams();
+            
+            document.getElementById('confirmPickBtn').disabled = true;
+            showAlert('draftingAlert', `<i class="fas fa-check-circle mr-2"></i>${pickedPlayer} drafted to ${teamName}!`, 'success');
+        }
+
+        async function resetDraft() {
+            if (confirm('Reset the draft?')) {
+                Object.values(appState.teams).forEach(team => {
+                    team.players = team.captain ? [team.captain] : [];
+                });
+                
+                appState.currentDraftRound = 1;
+                appState.currentDraftPick = 1;
+                appState.selectedPlayer = null;
+                
+                await saveToStorage();
+                renderDraftingInterface();
+                renderTeams();
+                showAlert('draftingAlert', '<i class="fas fa-check-circle mr-2"></i>Draft reset!', 'success');
+            }
+        }
+
+        // Team Management
+        function renderTeams() {
+            const container = document.getElementById('teamsGrid');
+            
+            container.innerHTML = Object.entries(appState.teams).map(([teamId, team]) => {
+                const playersList = team.players.map(player => {
+                    const isCaptain = player === team.captain;
+                    return `
+                        <li class="flex justify-between items-center p-2 ${isCaptain ? 'bg-purple-50 rounded' : ''}">
+                            <span class="flex items-center">
+                                ${isCaptain ? '<i class="fas fa-crown text-yellow-500 mr-2"></i>' : '<i class="fas fa-user text-gray-400 mr-2"></i>'}
+                                <span class="${isCaptain ? 'font-semibold text-purple-700' : 'text-gray-700'}">${player}</span>
+                            </span>
+                            ${!isCaptain ? `
+                                <button onclick="removeFromTeam(${teamId}, '${player}')" class="text-red-500 hover:text-red-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            ` : ''}
+                        </li>
+                    `;
+                }).join('');
+                
+                return `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 card-hover">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-gray-800">${team.name}</h3>
+                            ${team.captain ? 
+                                `<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
+                                    <i class="fas fa-user-shield mr-1"></i>${team.captain}
+                                </span>` : 
+                                '<span class="text-red-500 text-sm"><i class="fas fa-exclamation-triangle mr-1"></i>No Captain</span>'
+                            }
+                        </div>
+                        <ul class="space-y-2">
+                            ${playersList || '<li class="text-gray-400 italic text-center py-4">No players assigned</li>'}
+                        </ul>
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Players:</span>
+                                <span class="font-bold text-lg ${team.players.length >= 12 ? 'text-green-600' : 'text-gray-800'}">
+                                    ${team.players.length}/12
+                                </span>
+                            </div>
+                            <div class="mt-2">
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="gradient-primary h-2 rounded-full transition-all duration-300" 
+                                         style="width: ${(team.players.length / 12) * 100}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function removeFromTeam(teamId, playerName) {
+            if (confirm(`Remove ${playerName}?`)) {
+                appState.teams[teamId].players = appState.teams[teamId].players.filter(p => p !== playerName);
+                await saveToStorage();
+                renderTeams();
+                renderDraftingInterface();
+            }
+        }
+
+        // Player Exchange
+        function loadTeamPlayers(direction) {
+            const teamSelect = document.getElementById(`${direction}Team`);
+            const playerSelect = document.getElementById(`${direction}Player`);
+            const teamId = teamSelect.value;
+            
+            playerSelect.innerHTML = '<option value="">Select Player</option>';
+            
+            if (teamId && appState.teams[teamId]) {
+                const players = appState.teams[teamId].players.filter(p => p !== appState.teams[teamId].captain);
+                playerSelect.innerHTML += players.map(player => 
+                    `<option value="${player}">${player}</option>`
+                ).join('');
+            }
+        }
+
+        async function exchangePlayers() {
+            const fromTeam = document.getElementById('fromTeam').value;
+            const toTeam = document.getElementById('toTeam').value;
+            const fromPlayer = document.getElementById('fromPlayer').value;
+            const toPlayer = document.getElementById('toPlayer').value;
+            
+            if (!fromTeam || !toTeam || !fromPlayer || !toPlayer) {
+                showAlert('exchangeAlert', '<i class="fas fa-exclamation-circle mr-2"></i>Select all fields!', 'error');
+                return;
+            }
+            
+            if (fromTeam === toTeam) {
+                showAlert('exchangeAlert', '<i class="fas fa-exclamation-circle mr-2"></i>Cannot exchange within same team!', 'error');
+                return;
+            }
+            
+            appState.teams[fromTeam].players = appState.teams[fromTeam].players.filter(p => p !== fromPlayer);
+            appState.teams[toTeam].players = appState.teams[toTeam].players.filter(p => p !== toPlayer);
+            
+            appState.teams[fromTeam].players.push(toPlayer);
+            appState.teams[toTeam].players.push(fromPlayer);
+            
+            await saveToStorage();
+            renderTeams();
+            loadTeamPlayers('from');
+            loadTeamPlayers('to');
+            
+            showAlert('exchangeAlert', `<i class="fas fa-check-circle mr-2"></i>Exchange successful!`, 'success');
+        }
+
+        // Storage Functions
+        async function saveToStorage() {
+            try {
+                const dataToSave = {
+                    ...appState,
+                    lastModified: new Date().toISOString(),
+                    modifiedBy: appState.currentUser || 'unknown'
+                };
+                
+                await storage.set('cricket_tournament_data', dataToSave);
+            } catch (error) {
+                console.error('Save error:', error);
+            }
+        }
+
+        async function loadFromStorage() {
+            try {
+                const savedData = await storage.get('cricket_tournament_data');
+                
+                if (savedData) {
+                    appState = { ...appState, ...savedData };
+                    appState.isLoggedIn = true; // Keep logged in state
+                }
+                
+                renderPlayersList();
+                updateCaptainSelect();
+                renderTeams();
+                updateExchangeTeamSelects();
+            } catch (error) {
+                console.error('Load error:', error);
+            }
+        }
+
+        async function clearAllData() {
+            if (confirm('Clear all data?')) {
+                appState = {
+                    players: [],
+                    teams: {
+                        1: { name: 'Team 1', players: [], captain: null },
+                        2: { name: 'Team 2', players: [], captain: null },
+                        3: { name: 'Team 3', players: [], captain: null },
+                        4: { name: 'Team 4', players: [], captain: null }
+                    },
+                    captains: [],
+                    currentDraftRound: 1,
+                    currentDraftPick: 1,
+                    draftOrderSet: false,
+                    selectedPlayer: null,
+                    isLoggedIn: true,
+                    currentUser: appState.currentUser
+                };
+                
+                await storage.del('cricket_tournament_data');
+                
+                renderPlayersList();
+                updateCaptainSelect();
+                renderTeams();
+                renderDraftingInterface();
+                
+                showAlert('systemAlert', '<i class="fas fa-check-circle mr-2"></i>Data cleared!', 'success');
+            }
+        }
+
+        // Utility Functions
+        function showAlert(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            const alertClass = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' :
+                              type === 'error' ? 'bg-red-100 border-red-400 text-red-700' :
+                              type === 'warning' ? 'bg-yellow-100 border-yellow-400 text-yellow-700' :
+                              'bg-blue-100 border-blue-400 text-blue-700';
+            
+            container.innerHTML = `
+                <div class="${alertClass} px-4 py-3 rounded-lg border notification">
+                    ${message}
+                </div>
+            `;
+            
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Initializing Cricket Tournament Dashboard...');
+            
+            document.getElementById('headerConnectionStatus').innerHTML = '<i class="fas fa-circle text-green-400 text-xs mr-1"></i>Active';
+            
+            renderPlayersList();
+            updateCaptainSelect();
+            updateLocalStorageInfo();
+            
+            console.log('Dashboard initialized successfully');
+        });
+    </script>
+</body>
+</html>
